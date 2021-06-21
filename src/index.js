@@ -2,6 +2,7 @@ const path = require('path')
 const http = require('http')
 const express = require('express')
 const socketio = require('socket.io')
+const Filter = require('bad-words')
 
 
 const app = express()
@@ -20,12 +21,22 @@ io.on('connection', (socket) => {
 
     socket.broadcast.emit('message', 'A new user has joined!') // sent to everybody except current user
 
-    socket.on('sendMessage', (text) => {
+    socket.on('sendMessage', (text, callback) => {
+        
+        const filter = new Filter()
+        
+        if(filter.isProfane(text)){
+            return callback('The profane is not allowed')
+        }
+
         io.emit('message', text)
+        callback()
     })
 
-    socket.on('sendLocation', (coords) => {
+    socket.on('sendLocation', (coords, callback) => {
         io.emit('message', `https://google.com/maps?q=${coords['latitude']},${coords['longitude']}`)
+
+        callback('Location shared!')
     })
 
     socket.on('disconnect', () => {
