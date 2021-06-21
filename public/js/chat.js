@@ -5,17 +5,20 @@ const socket = io()
 const $messageForm = document.querySelector('#message-form')
 const $messageFormInput = $messageForm.querySelector('input')
 const $messageFormButton = $messageForm.querySelector('button')
-const $buttonLocation = $messageForm.querySelector('#send-location')
+const $buttonLocation = document.querySelector('#send-location')
 const $messages = document.querySelector('#messages')
 
 //Templates
 const messageTemplate = document.querySelector('#message-template').innerHTML
+const locationTemplate = document.querySelector('#location-template').innerHTML
 
 socket.on('message', (message) => {
-    console.log(message)
-    const html = Mustache.render(messageTemplate, {
-        message
-    })
+    const html = Mustache.render(messageTemplate, {message})
+    $messages.insertAdjacentHTML('beforeend', html)
+})
+
+socket.on('locationMessage', (url) => {
+    const html = Mustache.render(locationTemplate, {url})
     $messages.insertAdjacentHTML('beforeend', html)
 })
 
@@ -37,7 +40,7 @@ $messageForm.addEventListener('submit', (e) => {
     })
 })
 
-document.querySelector('#send-location').addEventListener('click', (e) => {
+$buttonLocation.addEventListener('click', (e) => {
     if(!navigator.geolocation){
         return alert('Geolocation is not supported your browser!')
     }
