@@ -20,8 +20,14 @@ let count = 0
 io.on('connection', (socket) => {
     console.log('New WebSocket connection')
 
-    socket.emit('message', generateMassage('Welcome!'))
-    socket.broadcast.emit('message', 'A new user has joined!') // sent to everybody except current user
+    socket.on('join', ({username, room}) => {
+        socket.join(room)
+
+        socket.emit('message', generateMassage('Welcome!'))
+        socket.broadcast.to(room).emit('message', generateMassage(`${username} has joined!`)) // sent to everybody except current user and another room
+
+    })
+    
 
     socket.on('sendMessage', (text, callback) => {
         

@@ -12,6 +12,9 @@ const $messages = document.querySelector('#messages')
 const messageTemplate = document.querySelector('#message-template').innerHTML
 const locationTemplate = document.querySelector('#location-template').innerHTML
 
+//Options
+const {username, room} = Qs.parse(location.search, { ignoreQueryPrefix: true})
+
 socket.on('message', (message) => {
     const html = Mustache.render(messageTemplate, {
         message: message.text,
@@ -64,3 +67,5 @@ $buttonLocation.addEventListener('click', (e) => {
     // Note*: _ Cannot transfer position object directly to socket server. 
     //        _ Need to create new object and add needed properties inside
 })
+
+socket.emit('join', {username, room})
