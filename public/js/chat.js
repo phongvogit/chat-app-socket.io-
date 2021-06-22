@@ -68,4 +68,9 @@ $buttonLocation.addEventListener('click', (e) => {
     //        _ Need to create new object and add needed properties inside
 })
 
-socket.emit('join', {username, room})
+socket.emit('join', {username, room}, (error) => {
+    if(error) {
+        alert(error)
+        location.href = '/'
+    }
+})
