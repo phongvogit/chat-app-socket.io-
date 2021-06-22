@@ -29,27 +29,32 @@ io.on('connection', (socket) => {
 
         socket.join(user.room)
 
-        socket.emit('message', generateMassage('Welcome!'))
-        socket.broadcast.to(user.room).emit('message', generateMassage(`${user.username} has joined!`)) // sent to everybody except current user and another room
+        socket.emit('message', generateMassage(user.username, 'Welcome!'))
+        socket.broadcast.to(user.room).emit('message', generateMassage(user.username,`${user.username} has joined!`)) // sent to everybody except current user and another room
 
+        io.to(user.room).emit('roomData', {
+            room: user.room,
+            users: getUsersInRoom(user.room)
+        })
     })
     
 
     socket.on('sendMessage', (text, callback) => {
-        
+        const user = getUser(socket.id)
         const filter = new Filter()
         
         if(filter.isProfane(text)){
             return callback('The profane is not allowed')
         }
 
-        io.emit('message', generateMassage(text))
+        io.to(user.room).emit('message', generateMassage(user.username, text))
         callback()
     })
 
     socket.on('sendLocation', (coords, callback) => {
+        const user = getUser(socket.id)
         const url = `https://google.com/maps?q=${coords['latitude']},${coords['longitude']}`
-        io.emit('locationMessage', generateLocationMessage(url))
+        io.to(user.room).emit('locationMessage', generateLocationMessage(user.username, url))
 
         callback('Location shared!')
     })
@@ -59,7 +64,11 @@ io.on('connection', (socket) => {
 
         if(user) {
             console.log(user)
-            io.to(user.room).emit('message', generateMassage(`${user.username} has left!`))
+            io.to(user.room).emit('message', generateMassage(user.username,`${user.username} has left!`))
+            io.to(user.room).emit('roomData', {
+                room: user.room,
+                users: getUsersInRoom(user.room)
+            })
         }
     })
 })
